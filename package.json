@@ -17,6 +17,7 @@
   "devDependencies": {
     "eslint-config-malexandre": "^1.0.2",
     "jest": "^21.1.0",
+    "mock-fs": "^4.4.1",
     "nodemon": "^1.12.1",
     "prettier-eslint": "^8.1.1"
   }
