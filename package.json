@@ -1,0 +1,23 @@
+{
+  "name": "live-hugo-server",
+  "version": "1.0.0",
+  "description": "Hugo admin interface to work on a live server",
+  "main": "index.js",
+  "author": "Marc Alexandre <github@malexandre.fr>",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.15.4",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "eslint-config-malexandre": "^1.0.2",
+    "jest": "^21.1.0",
+    "nodemon": "^1.12.1",
+    "prettier-eslint": "^8.1.1"
+  }
+}
