@@ -7,19 +7,11 @@ const winston = require('winston')
 const { postFolder } = require('../config')
 
 const list = async(options = {}) => {
-    options = Object.assign(
-        {
-            filter: undefined,
-            orderby: ['-date'],
-            offset: 0,
-            count: 10
-        },
-        options
-    )
-
-    if (!Array.isArray(options.orderby)) {
+    if (options.orderby && !Array.isArray(options.orderby)) {
         options.orderby = [options.orderby]
     }
+
+    const { filter = undefined, orderby = ['-date'], offset = 0, count = 10 } = options
 
     const found = []
 
@@ -42,7 +34,7 @@ const list = async(options = {}) => {
             return
         }
         const attributes = frontMatter(data).attributes
-        if (attributes.title && (!options.filter || attributes.title.includes(options.filter))) {
+        if (attributes.title && (!filter || attributes.title.includes(filter))) {
             found.push({
                 path: `${postFolder}/${file}`,
                 title: attributes.title,
@@ -54,13 +46,13 @@ const list = async(options = {}) => {
 
     const ordered = _.orderBy(
         found,
-        options.orderby.map((item) => item.replace(/^-/, '')),
-        options.orderby.map((item) => (item[0] === '-' ? 'desc' : 'asc'))
+        orderby.map((item) => item.replace(/^-/, '')),
+        orderby.map((item) => (item[0] === '-' ? 'desc' : 'asc'))
     )
 
     return {
-        items: ordered.slice(options.offset, options.offset + options.count),
-        more: ordered.slice(options.offset, options.offset + options.count + 1).length > options.count
+        items: ordered.slice(offset, offset + count),
+        more: ordered.slice(offset, offset + count + 1).length > count
     }
 }
 
