@@ -36,7 +36,7 @@ test('Publishing an existing published version should make no change', () => {
     expect(data).toBe(oldData)
 })
 
-test('Unpublishing an existing draft should add the draft status', () => {
+test('Unpublishing an existing published version should add the draft status', () => {
     const path = 'content/post/post-1.md'
     const sentDraftData = generatePost(1, 'Post 1').replace('---', '---\ndraft: true')
     const oldData = fs.readFileSync(path, 'utf8')
@@ -44,4 +44,12 @@ test('Unpublishing an existing draft should add the draft status', () => {
     const data = fs.readFileSync(path, 'utf8')
     expect(data).toBe(sentDraftData)
     expect(data).not.toBe(oldData)
+})
+
+test('Publishing a non-existant file should throw an error', () => {
+    expect(() => Post.setPublish('fake path', true)).toThrow()
+})
+
+test('Unpublishing a non-existant file should throw an error', () => {
+    expect(() => Post.setPublish('fake path', false)).toThrow()
 })

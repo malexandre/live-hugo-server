@@ -66,7 +66,7 @@ const setPublish = (path, publishStatus) => {
     }
     catch (e) {
         winston.error('Post.save: Error while reading old file', e)
-        return
+        throw e
     }
 
     const yamlData = frontMatter(file)
