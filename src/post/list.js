@@ -2,16 +2,32 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const frontMatter = require('front-matter')
 const moment = require('moment')
+const slugify = require('slugify')
 const winston = require('winston')
 
 const { postFolder } = require('../config')
 
-const list = async(options = {}) => {
-    if (options.orderby && !Array.isArray(options.orderby)) {
-        options.orderby = [options.orderby]
+const filterAttributes = (attributes, filter = '') => {
+    filter = slugify(filter)
+    const { title = '' } = attributes  // Check categories and description also?
+
+    if (title.includes(filter)) {
+        return true
     }
 
-    const { filter = undefined, orderby = ['-date'], offset = 0, count = 10 } = options
+    return false
+}
+
+const list = async(options = {}) => {
+    let orderby = ['-date']
+    if (options.orderby && !Array.isArray(options.orderby)) {
+        orderby = [options.orderby]
+    }
+    else if (options.orderby) {
+        orderby = options.orderby
+    }
+
+    const { filter = undefined, offset = 0, count = 10 } = options
 
     const found = []
 
@@ -34,7 +50,7 @@ const list = async(options = {}) => {
             return
         }
         const attributes = frontMatter(data).attributes
-        if (attributes.title && (!filter || attributes.title.includes(filter))) {
+        if (filterAttributes(attributes, filter)) {
             found.push({
                 path: `${postFolder}/${file}`,
                 title: attributes.title,
