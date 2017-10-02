@@ -24,14 +24,14 @@ const buildJsonResponse = (yamlData) => {
     return postJson
 }
 
-const save = (post) => {
+const save = (post, oldPath) => {
     const yamlData = frontMatter(post)
     const filename = `${slugify(yamlData.attributes.title.toLowerCase())}.md`
     const path = `content/post/${filename}`
 
     let oldFile
     try {
-        oldFile = fs.readFileSync(path, 'utf8')
+        oldFile = fs.readFileSync(oldPath || path, 'utf8')
     }
     catch (e) {
         if (!e.message.includes('ENOENT')) {
@@ -46,6 +46,11 @@ const save = (post) => {
         path,
         setDraftStatus(post, yamlData.attributes.draft, oldYamlData ? !!oldYamlData.attributes.draft : true)
     )
+
+    if (oldPath) {
+        winston.info('Post.save: Deleting old file at', oldPath)
+        fs.unlinkSync(oldPath)
+    }
 
     const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
     if (postJson.categories) {

@@ -87,6 +87,24 @@ test('Saving an existing post should write the file on the fs', () => {
     expect(data).not.toBe(oldData)
 })
 
+test('Saving an existing post with a new name should move the file on the fs', () => {
+    const oldPath = 'content/post/post-1.md'
+    const oldData = fs.readFileSync(oldPath, 'utf8')
+    const sentData = generatePost(
+        1,
+        'New Post 1',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    Post.save(sentData, oldPath)
+    const data = fs.readFileSync('content/post/new-post-1.md', 'utf8')
+    expect(data).toBe(sentData)
+    expect(data).not.toBe(oldData)
+    expect(() => {
+        fs.readFileSync(oldPath, 'utf8')
+    }).toThrow()
+})
+
 test('Saving an existing post without draft status should keep the same draft status on the fs', () => {
     const sentNotDraftData = generatePost(
         1,
