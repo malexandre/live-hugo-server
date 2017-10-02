@@ -70,3 +70,11 @@ test('Listing 5 posts page order by -date should have 5 "Random X" items in orde
         expect(resp.items[i].title).toBe(`Random ${15 - i}`)
     }
 })
+
+test('Listing 5 posts page order by [-date] should have 5 "Random X" items in order', async() => {
+    const resp = await Post.list({ count: 5, orderby: ['-date'] })
+
+    for (let i = 0; i < 5; ++i) {
+        expect(resp.items[i].title).toBe(`Random ${15 - i}`)
+    }
+})
