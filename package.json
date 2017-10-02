@@ -1,33 +1,34 @@
 {
-  "name": "live-hugo-server",
-  "version": "1.0.0",
-  "description": "Hugo admin interface to work on a live server",
-  "main": "index.js",
-  "author": "Marc Alexandre <github@malexandre.fr>",
-  "license": "MIT",
-  "scripts": {
-    "start": "nodemon src/index.js",
-    "test": "jest"
-  },
-  "jest": {
-    "testRegex": "/__tests__/.*(\\.|/)(test|spec)\\.jsx?$"
-  },
-  "dependencies": {
-    "body-parser": "^1.18.2",
-    "express": "^4.15.4",
-    "front-matter": "^2.2.0",
-    "fs-extra": "^4.0.2",
-    "lodash": "^4.17.4",
-    "moment": "^2.18.1",
-    "slugify": "^1.2.1",
-    "winston": "^2.3.1"
-  },
-  "devDependencies": {
-    "eslint-config-malexandre": "^1.0.2",
-    "jest": "^21.1.0",
-    "mock-fs": "^4.4.1",
-    "nodemon": "^1.12.1",
-    "prettier-eslint": "^8.1.1",
-    "supertest": "^3.0.0"
-  }
+    "name": "live-hugo-server",
+    "version": "1.0.0",
+    "description": "Hugo admin interface to work on a live server",
+    "main": "index.js",
+    "author": "Marc Alexandre <github@malexandre.fr>",
+    "license": "MIT",
+    "scripts": {
+        "start": "nodemon src/index.js",
+        "test": "jest"
+    },
+    "jest": {
+        "testRegex": "/__tests__/.*(\\.|/)(test|spec)\\.jsx?$",
+        "setupFiles": ["./jest-set-up.js"]
+    },
+    "dependencies": {
+        "body-parser": "^1.18.2",
+        "express": "^4.15.4",
+        "front-matter": "^2.2.0",
+        "fs-extra": "^4.0.2",
+        "lodash": "^4.17.4",
+        "moment": "^2.18.1",
+        "slugify": "^1.2.1",
+        "winston": "^2.3.1"
+    },
+    "devDependencies": {
+        "eslint-config-malexandre": "^1.0.2",
+        "jest": "^21.1.0",
+        "mock-fs": "^4.4.1",
+        "nodemon": "^1.12.1",
+        "prettier-eslint": "^8.1.1",
+        "supertest": "^3.0.0"
+    }
 }
