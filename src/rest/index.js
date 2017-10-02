@@ -1,11 +1,12 @@
 'use strict'
 
-const { list } = require('../post')
+const { list, save, setPublish } = require('../post')
 
 const fakeHandler = (req, res) => res.sendStatus(200)
 
 const buildApi = (app) => {
     app.get('/api/get', fakeHandler)
+
     app.get('/api/list', async(req, res) => {
         const count = parseInt(req.query.count)
         const offset = parseInt(req.query.offset)
@@ -36,9 +37,40 @@ const buildApi = (app) => {
     })
 
     app.post('/api/build', fakeHandler)
-    app.post('/api/publish', fakeHandler)
-    app.post('/api/save', fakeHandler)
-    app.post('/api/unpublish', fakeHandler)
+
+    app.post('/api/publish', (req, res) => {
+        const { path } = req.body
+
+        if (!path) {
+            res.status(400).send('Path is required')
+            return
+        }
+
+        res.status(200).json(setPublish(path, true))
+    })
+
+    app.post('/api/save', (req, res) => {
+        const { post } = req.body
+
+        if (!post) {
+            res.status(400).send('Post is required')
+            return
+        }
+
+        res.status(200).json(save(post))
+    })
+
+    app.post('/api/unpublish', (req, res) => {
+        const { path } = req.body
+
+        if (!path) {
+            res.status(400).send('Path is required')
+            return
+        }
+
+        res.status(200).json(setPublish(path, false))
+    })
+
     app.post('/api/upload', fakeHandler)
 
     app.delete('/api/delete', fakeHandler)
