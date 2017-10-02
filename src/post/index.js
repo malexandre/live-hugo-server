@@ -1,4 +1,4 @@
 const list = require('./list')
-const save = require('./save')
+const savePublish = require('./save-publish')
 
-module.exports = { list, save }
+module.exports = { list, save: savePublish }
