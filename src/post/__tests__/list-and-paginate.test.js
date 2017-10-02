@@ -1,28 +1,9 @@
 const mockFs = require('mock-fs')
 const Post = require('../')
-const { generatePost } = require('./setup-common')
+const { initMockFs } = require('./setup-common')
 
-beforeEach(() => {
-    const posts = {}
-
-    for (let i = 1; i <= 5; ++i) {
-        posts[`post-${i}.md`] = generatePost(i, `Post ${i}`)
-    }
-
-    for (let i = 6; i <= 15; ++i) {
-        posts[`random-${i}.md`] = generatePost(i, `Random ${i}`)
-    }
-
-    mockFs({
-        content: {
-            post: posts
-        }
-    })
-})
-
-afterEach(async() => {
-    mockFs.restore()
-})
+beforeEach(() => initMockFs())
+afterEach(() => mockFs.restore())
 
 test('Listing posts should have 10 items', async() => {
     const resp = await Post.list()
