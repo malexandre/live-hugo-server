@@ -34,9 +34,9 @@ const save = (post, oldPath) => {
         oldFile = fs.readFileSync(oldPath || path, 'utf8')
     }
     catch (e) {
-        if (!e.message.includes('ENOENT')) {
-            winston.error('Post.save: Error while reading old file', e)
-            return
+        if (oldPath || !e.message.includes('ENOENT')) {
+            winston.error(`Post.save: Error while reading old file: path(${path}) oldPath(${oldPath})`, e)
+            throw e
         }
     }
     const oldYamlData = oldFile ? frontMatter(oldFile) : undefined
