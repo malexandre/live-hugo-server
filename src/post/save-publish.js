@@ -16,9 +16,17 @@ const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) 
     return post
 }
 
-const save = async(post) => {
-    const data = frontMatter(post)
-    const filename = `${slugify(data.attributes.title.toLowerCase())}.md`
+const buildJsonResponse = (yamlData) => {
+    const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
+    if (postJson.categories) {
+        postJson.categories = postJson.categories.split(',')
+    }
+    return postJson
+}
+
+const save = (post) => {
+    const yamlData = frontMatter(post)
+    const filename = `${slugify(yamlData.attributes.title.toLowerCase())}.md`
     const path = `content/post/${filename}`
 
     let oldFile
@@ -31,16 +39,43 @@ const save = async(post) => {
             return
         }
     }
-    const oldData = oldFile ? frontMatter(oldFile) : undefined
+    const oldYamlData = oldFile ? frontMatter(oldFile) : undefined
 
-    winston.info(`Post.save: Saving post ${filename} (${oldData ? 'edit' : 'new'}):`, data)
-    fs.writeFileSync(path, setDraftStatus(post, data.attributes.draft, oldData ? !!oldData.attributes.draft : true))
+    winston.info(`Post.save: Saving post ${filename} (${oldYamlData ? 'edit' : 'new'}):`, yamlData)
+    fs.writeFileSync(
+        path,
+        setDraftStatus(post, yamlData.attributes.draft, oldYamlData ? !!oldYamlData.attributes.draft : true)
+    )
 
-    const postJson = Object.assign({ content: data.body }, data.attributes)
+    const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
     if (postJson.categories) {
         postJson.categories = postJson.categories.split(',')
     }
-    return postJson
+    return buildJsonResponse(yamlData)
 }
 
-module.exports = save
+const setPublish = (path, publishStatus) => {
+    let file
+    try {
+        file = fs.readFileSync(path, 'utf8')
+    }
+    catch (e) {
+        winston.error('Post.save: Error while reading old file', e)
+        return
+    }
+
+    const yamlData = frontMatter(file)
+
+    winston.info(`Post.setPublish: Setting post ${path} draft status to ${!publishStatus} from:`, yamlData)
+
+    const newFile = setDraftStatus(file, yamlData.attributes.draft, !publishStatus)
+
+    if (newFile !== file) {
+        fs.writeFileSync(path, newFile)
+        return buildJsonResponse(frontMatter(newFile))
+    }
+
+    return buildJsonResponse(yamlData)
+}
+
+module.exports = { setPublish, save }
