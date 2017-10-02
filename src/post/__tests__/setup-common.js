@@ -24,7 +24,7 @@ const initMockFs = () => {
     }
 
     for (let i = 6; i <= 15; ++i) {
-        posts[`random-${i}.md`] = generatePost(i, `Random ${i}`)
+        posts[`random-${i}.md`] = generatePost(i, `Random ${i}`, { draft: true })
     }
 
     mockFs({

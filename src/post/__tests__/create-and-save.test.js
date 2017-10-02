@@ -31,11 +31,11 @@ test('Creating a new post should return the new post JSON with the date', async(
     expect(resp.date).toEqual(new Date(16 * 1000))
 })
 
-test('Creating a new post should write the file on the file system', async() => {
+test('Creating a new post should write the file on the fs', async() => {
     const sentData = generatePost(16, 'Post Test', undefined, 'Test content')
     await Post.save(sentData)
     const data = fs.readFileSync('content/post/post-test.md', 'utf8')
-    expect(data).toBe(sentData)
+    expect(data).toBe(sentData.replace('---', '---\ndraft: true'))
 })
 
 test('Saving an existing post should return the new post JSON with the tile', async() => {
@@ -73,7 +73,7 @@ test('Saving an existing post should return the new post JSON with the date', as
     expect(resp.date).toEqual(new Date(1 * 1000))
 })
 
-test('Saving an existing post should write the file on the file system', async() => {
+test('Saving an existing post should write the file on the fs', async() => {
     const oldData = fs.readFileSync('content/post/post-1.md', 'utf8')
     const sentData = generatePost(
         1,
@@ -85,4 +85,48 @@ test('Saving an existing post should write the file on the file system', async()
     const data = fs.readFileSync('content/post/post-1.md', 'utf8')
     expect(data).toBe(sentData)
     expect(data).not.toBe(oldData)
+})
+
+test('Saving an existing post without draft status should keep the same draft status on the fs', async() => {
+    const sentNotDraftData = generatePost(
+        1,
+        'Post 1',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    await Post.save(sentNotDraftData)
+    const notDraftData = fs.readFileSync('content/post/post-1.md', 'utf8')
+    expect(notDraftData).toBe(sentNotDraftData)
+
+    const sentDraftData = generatePost(
+        6,
+        'Random 6',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    await Post.save(sentDraftData)
+    const data = fs.readFileSync('content/post/random-6.md', 'utf8')
+    expect(data).toBe(sentDraftData.replace('---', '---\ndraft: true'))
+})
+
+test('Saving an existing post with a changed draft status should keep the same draft status on the fs', async() => {
+    const sentNotDraftData = generatePost(
+        1,
+        'Post 1',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    await Post.save(sentNotDraftData.replace('---', '---\ndraft: true'))
+    const notDraftData = fs.readFileSync('content/post/post-1.md', 'utf8')
+    expect(notDraftData).toBe(sentNotDraftData)
+
+    const sentDraftData = generatePost(
+        6,
+        'Random 6',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    ).replace('---', '---\ndraft: false')
+    await Post.save(sentDraftData)
+    const data = fs.readFileSync('content/post/random-6.md', 'utf8')
+    expect(data).toBe(sentDraftData.replace('---', '---\ndraft: true'))
 })
