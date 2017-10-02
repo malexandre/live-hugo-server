@@ -9,6 +9,9 @@
     "start": "nodemon src/index.js",
     "test": "jest"
   },
+  "jest": {
+    "testRegex": "/__tests__/.*(\\.|/)(test|spec)\\.jsx?$"
+  },
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.15.4",
