@@ -28,11 +28,27 @@ test('Calling save with a post', async() => {
         .post('/api/save')
         .send({ post: 'My Post' })
     expect(response.statusCode).toBe(200)
-    expect(Post.save).toBeCalledWith('My Post')
+    expect(Post.save).toBeCalledWith('My Post', undefined)
 })
 
 test('Calling save without a post', async() => {
     const response = await supertest(app).post('/api/save')
+    expect(response.statusCode).toBe(400)
+    expect(Post.save).not.toBeCalled()
+})
+
+test('Calling save with a post and an oldPath', async() => {
+    const response = await supertest(app)
+        .post('/api/save')
+        .send({ post: 'My Post', oldPath: 'My Old Path' })
+    expect(response.statusCode).toBe(200)
+    expect(Post.save).toBeCalledWith('My Post', 'My Old Path')
+})
+
+test('Calling save with an oldPath and without a post', async() => {
+    const response = await supertest(app)
+        .post('/api/save')
+        .send({ oldPath: 'My Old Path' })
     expect(response.statusCode).toBe(400)
     expect(Post.save).not.toBeCalled()
 })

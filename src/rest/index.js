@@ -50,14 +50,14 @@ const buildApi = (app) => {
     })
 
     app.post('/api/save', (req, res) => {
-        const { post } = req.body
+        const { post, oldPath } = req.body
 
         if (!post) {
             res.status(400).send('Post is required')
             return
         }
 
-        res.status(200).json(save(post))
+        res.status(200).json(save(post, oldPath))
     })
 
     app.post('/api/unpublish', (req, res) => {
