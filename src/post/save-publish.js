@@ -3,6 +3,8 @@ const frontMatter = require('front-matter')
 const slugify = require('slugify')
 const winston = require('winston')
 
+const { postFolder } = require('../config')
+
 const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) => {
     if (!isAlreadyDraft && isOldVersionDraft) {
         winston.info('Adding draft status')
@@ -27,7 +29,7 @@ const buildJsonResponse = (yamlData) => {
 const save = (post, oldPath) => {
     const yamlData = frontMatter(post)
     const filename = `${slugify(yamlData.attributes.title.toLowerCase())}.md`
-    const path = `content/post/${filename}`
+    const path = `${postFolder}/${filename}`
 
     let oldFile
     try {
