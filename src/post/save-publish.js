@@ -19,14 +19,14 @@ const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) 
     return post
 }
 
-const save = (post, oldPath) => {
+const save = async(post, oldPath) => {
     const yamlData = frontMatter(post)
     const filename = `${slugify(yamlData.attributes.title.toLowerCase())}.md`
     const path = `${postFolder}/${filename}`
 
     let oldFile
     try {
-        oldFile = fs.readFileSync(oldPath || path, 'utf8')
+        oldFile = await fs.readFile(oldPath || path, 'utf8')
     }
     catch (e) {
         if (oldPath || !e.message.includes('ENOENT')) {
@@ -37,14 +37,14 @@ const save = (post, oldPath) => {
     const oldYamlData = oldFile ? frontMatter(oldFile) : undefined
 
     winston.info(`Post.save: Saving post ${filename} (${oldYamlData ? 'edit' : 'new'}):`, yamlData)
-    fs.writeFileSync(
+    await fs.writeFile(
         path,
         setDraftStatus(post, yamlData.attributes.draft, oldYamlData ? !!oldYamlData.attributes.draft : true)
     )
 
     if (oldPath) {
         winston.info('Post.save: Deleting old file at', oldPath)
-        fs.unlinkSync(oldPath)
+        await fs.remove(oldPath)
     }
 
     const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
@@ -54,10 +54,10 @@ const save = (post, oldPath) => {
     return buildJsonResponse(yamlData)
 }
 
-const setPublish = (path, publishStatus) => {
+const setPublish = async(path, publishStatus) => {
     let file
     try {
-        file = fs.readFileSync(path, 'utf8')
+        file = await fs.readFile(path, 'utf8')
     }
     catch (e) {
         winston.error('Post.save: Error while reading old file', e)
@@ -71,7 +71,7 @@ const setPublish = (path, publishStatus) => {
     const newFile = setDraftStatus(file, yamlData.attributes.draft, !publishStatus)
 
     if (newFile !== file) {
-        fs.writeFileSync(path, newFile)
+        await fs.writeFile(path, newFile)
         return buildJsonResponse(frontMatter(newFile))
     }
 

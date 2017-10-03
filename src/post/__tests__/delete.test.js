@@ -12,8 +12,8 @@ test('Deleting an existing post should delete it in the file system', async() =>
     expect(() => fs.readFileSync(path, 'utf8')).toThrowError('ENOENT')
 })
 
-test('Deleting an non-existing post should throw an error', async() => {
-    expect.assertions(1)
+test('Deleting an non-existing post should do nothing', async() => {
+    expect.assertions(0)
     try {
         await Post.delete('fake path')
     }

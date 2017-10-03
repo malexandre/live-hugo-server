@@ -3,7 +3,7 @@ const winston = require('winston')
 
 const del = async(path) => {
     try {
-        await fs.unlink(path)
+        await fs.remove(path)
     }
     catch (e) {
         winston.error('Post.delete: Error while deleting file', path, e)
