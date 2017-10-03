@@ -47,9 +47,9 @@ test('Unpublishing an existing published version should add the draft status', (
 })
 
 test('Publishing a non-existant file should throw an error', () => {
-    expect(() => Post.setPublish('fake path', true)).toThrow()
+    expect(() => Post.setPublish('fake path', true)).toThrowError('ENOENT')
 })
 
 test('Unpublishing a non-existant file should throw an error', () => {
-    expect(() => Post.setPublish('fake path', false)).toThrow()
+    expect(() => Post.setPublish('fake path', false)).toThrowError('ENOENT')
 })
