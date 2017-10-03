@@ -1,4 +1,4 @@
-const fs = require('fs-extra')
+const fs = require('fs')
 const mockFs = require('mock-fs')
 const Post = require('../')
 const { generatePost, initMockFs } = require('./setup-common')
