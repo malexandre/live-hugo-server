@@ -30,7 +30,7 @@ test('Calling list with default parameters', async() => {
 test('Calling list with one custom orderby', async() => {
     const response = await supertest(app).get('/api/list?orderby=title')
     expect(response.statusCode).toBe(200)
-    expect(Post.list).toBeCalledWith({ orderby: 'title', offset: 0, count: 10 })
+    expect(Post.list).toBeCalledWith({ orderby: ['title'], offset: 0, count: 10 })
 })
 
 test('Calling list with multiple custom orderby', async() => {
@@ -78,5 +78,5 @@ test('Calling list with multiple custom count', async() => {
 test('Calling list with all arugments', async() => {
     const response = await supertest(app).get('/api/list?filter=query&offset=10&count=20&orderby=title')
     expect(response.statusCode).toBe(200)
-    expect(Post.list).toBeCalledWith({ filter: 'query', orderby: 'title', offset: 10, count: 20 })
+    expect(Post.list).toBeCalledWith({ filter: 'query', orderby: ['title'], offset: 10, count: 20 })
 })

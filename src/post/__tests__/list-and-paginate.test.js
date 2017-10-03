@@ -56,7 +56,7 @@ test('Listing 5 posts page should have more items', async() => {
 })
 
 test('Listing 5 posts page order by date should have 5 "Post X" items in order', async() => {
-    const resp = await Post.list({ count: 5, orderby: 'date' })
+    const resp = await Post.list({ count: 5, orderby: ['date'] })
 
     for (let i = 0; i < 5; ++i) {
         expect(resp.items[i].title).toBe(`Post ${i + 1}`)
@@ -64,7 +64,7 @@ test('Listing 5 posts page order by date should have 5 "Post X" items in order',
 })
 
 test('Listing 5 posts page order by -date should have 5 "Random X" items in order', async() => {
-    const resp = await Post.list({ count: 5, orderby: '-date' })
+    const resp = await Post.list({ count: 5, orderby: ['-date'] })
 
     for (let i = 0; i < 5; ++i) {
         expect(resp.items[i].title).toBe(`Random ${15 - i}`)

@@ -19,15 +19,7 @@ const filterAttributes = (attributes, filter = '') => {
 }
 
 const list = async(options = {}) => {
-    let orderby = ['-date']
-    if (options.orderby && !Array.isArray(options.orderby)) {
-        orderby = [options.orderby]
-    }
-    else if (options.orderby) {
-        orderby = options.orderby
-    }
-
-    const { filter = undefined, offset = 0, count = 10 } = options
+    const { filter = undefined, offset = 0, count = 10, orderby = ['-date'] } = options
 
     const found = []
 

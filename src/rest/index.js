@@ -49,14 +49,22 @@ const apiGet = (req, res) => {
 const apiList = async(req, res) => {
     const count = parseInt(req.query.count)
     const offset = parseInt(req.query.offset)
+    let orderby
 
     if (Array.isArray(req.query.filter)) {
         return res.status(400).send('filter should be unique')
     }
 
+    if (req.query.orderby && !Array.isArray(req.query.orderby)) {
+        orderby = [req.query.orderby]
+    }
+    else {
+        orderby = req.query.orderby
+    }
+
     const results = list({
         filter: req.query.filter,
-        orderby: req.query.orderby,
+        orderby: orderby,
         offset: !isNaN(offset) && offset >= 0 ? offset : 0,
         count: !isNaN(count) && count > 0 ? count : 10
     })
