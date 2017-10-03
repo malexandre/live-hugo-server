@@ -3,6 +3,7 @@ const frontMatter = require('front-matter')
 const slugify = require('slugify')
 const winston = require('winston')
 
+const buildJsonResponse = require('./build-json-response')
 const { postFolder } = require('../config')
 
 const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) => {
@@ -16,14 +17,6 @@ const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) 
     }
 
     return post
-}
-
-const buildJsonResponse = (yamlData) => {
-    const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
-    if (postJson.categories) {
-        postJson.categories = postJson.categories.split(',')
-    }
-    return postJson
 }
 
 const save = (post, oldPath) => {
