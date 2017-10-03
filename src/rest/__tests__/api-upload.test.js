@@ -1,4 +1,4 @@
-const fs = require('fs-extra')
+const fs = require('fs')
 const express = require('express')
 const bodyParser = require('body-parser')
 const mockFs = require('mock-fs')
@@ -27,8 +27,22 @@ test('Calling upload with an image and a postName', async() => {
         .post('/api/upload')
         .field('postName', 'My Post')
         .attach('new-image', 'src/rest/__tests__/test.jpg')
-    expect(response).toBe(200)
     expect(response.statusCode).toBe(200)
-    const img = fs.readFileSync('assest/img/my-post/test.jpg', 'utf8')
+    expect(response.text).toBe('assets/img/my-post/test.jpg')
+    const img = fs.readFileSync(response.text, 'utf8')
     expect(img).toBeDefined()
+    // Multer seems to go through MockFS and write in the disk. Cleaning the file
+    fs.unlink(response.text)
+})
+
+test('Calling upload with an image and without a postName', async() => {
+    const response = await supertest(app)
+        .post('/api/upload')
+        .attach('new-image', 'src/rest/__tests__/test.jpg')
+    expect(response.statusCode).toBe(200)
+    expect(response.text).toBe('assets/img/test.jpg')
+    const img = fs.readFileSync(response.text, 'utf8')
+    expect(img).toBeDefined()
+    // Multer seems to go through MockFS and write in the disk. Cleaning the file
+    fs.unlink(response.text)
 })
