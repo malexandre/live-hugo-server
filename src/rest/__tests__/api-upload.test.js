@@ -32,7 +32,7 @@ test('Calling upload with an image and a postName', async() => {
     const img = fs.readFileSync(response.text, 'utf8')
     expect(img).toBeDefined()
     // Multer seems to go through MockFS and write in the disk. Cleaning the file
-    fs.unlink(response.text)
+    fs.unlinkSync(response.text)
 })
 
 test('Calling upload with an image and without a postName', async() => {
@@ -44,5 +44,5 @@ test('Calling upload with an image and without a postName', async() => {
     const img = fs.readFileSync(response.text, 'utf8')
     expect(img).toBeDefined()
     // Multer seems to go through MockFS and write in the disk. Cleaning the file
-    fs.unlink(response.text)
+    fs.unlinkSync(response.text)
 })

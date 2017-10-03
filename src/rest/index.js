@@ -1,7 +1,6 @@
 'use strict'
 
 const { check, validationResult } = require('express-validator/check')
-const mkdirp = require('mkdirp-promise')
 const multer = require('multer')
 const slugify = require('slugify')
 
@@ -18,7 +17,7 @@ const storage = multer.diskStorage({
 
         const postSlug = postName ? `${slugify(postName)}/`.toLowerCase() : ''
         const destFolder = `${uploadFolder}/${postSlug}`
-        mkdirp(destFolder).then(() => cb(null, destFolder))
+        cb(null, destFolder)
     },
     filename: (req, file, cb) => cb(null, file.originalname)
 })
@@ -123,7 +122,7 @@ const buildApi = (app) => {
     app.post('/api/unpublish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(false))
 
     app.post('/api/build', fakeHandler)
-    app.post('/api/upload', upload.single('new-image'), async(req, res) => {
+    app.post('/api/upload', upload.single('new-image'), (req, res) => {
         res.status(200).send(req.file.path)
     })
 }
