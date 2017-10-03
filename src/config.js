@@ -2,5 +2,6 @@
 
 module.exports = {
     port: '3000',
-    postFolder: 'content/post'
+    postFolder: 'content/post',
+    uploadFolder: 'assets/img'
 }

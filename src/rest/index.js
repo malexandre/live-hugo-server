@@ -1,6 +1,34 @@
 'use strict'
 
+const mkdirp = require('mkdirp-promise')
+const multer = require('multer')
+const slugify = require('slugify')
+
+const { uploadFolder } = require('../config')
 const { get, list, save, setPublish } = require('../post')
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        let postName = req.body.postName
+
+        if (typeof postName !== 'string' || !postName) {
+            postName = undefined
+        }
+
+        const postSlug = postName ? `${slugify(postName)}/`.toLowerCase() : ''
+        const destFolder = `${uploadFolder}/${postSlug}`
+        mkdirp(destFolder).then(() => cb(null, destFolder))
+    },
+    filename: (req, file, cb) => cb(null, file.originalname)
+})
+
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const acceptedMimetype = ['image/gif', 'image/jpeg', 'image/png', 'image/webp']
+        cb(null, acceptedMimetype.indexOf(file.mimetype) !== -1)
+    }
+})
 
 const fakeHandler = (req, res) => res.sendStatus(200)
 
@@ -98,7 +126,9 @@ const buildApi = (app) => {
     app.post('/api/unpublish', apiSetPublish(false))
 
     app.post('/api/build', fakeHandler)
-    app.post('/api/upload', fakeHandler)
+    app.post('/api/upload', upload.single('new-image'), async(req, res) => {
+        res.status(200).send(req.file.path)
+    })
 }
 
 module.exports = { buildApi }
