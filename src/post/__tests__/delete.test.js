@@ -8,14 +8,14 @@ afterEach(() => mockFs.restore())
 
 test('Deleting an existing post should delete it in the file system', async() => {
     const path = 'content/post/post-1.md'
-    await Post.delete(path)
+    await Post.del(path)
     expect(() => fs.readFileSync(path, 'utf8')).toThrowError('ENOENT')
 })
 
 test('Deleting an non-existing post should do nothing', async() => {
-    expect.assertions(0)
+    expect.assertions(1)
     try {
-        await Post.delete('fake path')
+        await Post.del('fake path')
     }
     catch (e) {
         expect(e.code).toBe('ENOENT')

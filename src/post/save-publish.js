@@ -1,4 +1,4 @@
-const fs = require('fs-extra')
+const fs = require('../promise-fs/')
 const frontMatter = require('front-matter')
 const slugify = require('slugify')
 const winston = require('winston')
@@ -26,7 +26,7 @@ const save = async(post, oldPath) => {
 
     let oldFile
     try {
-        oldFile = await fs.readFile(oldPath || path, 'utf8')
+        oldFile = await fs.readFileAsync(oldPath || path, 'utf8')
     }
     catch (e) {
         if (oldPath || !e.message.includes('ENOENT')) {
@@ -37,14 +37,14 @@ const save = async(post, oldPath) => {
     const oldYamlData = oldFile ? frontMatter(oldFile) : undefined
 
     winston.info(`Post.save: Saving post ${filename} (${oldYamlData ? 'edit' : 'new'}):`, yamlData)
-    await fs.writeFile(
+    await fs.writeFileAsync(
         path,
         setDraftStatus(post, yamlData.attributes.draft, oldYamlData ? !!oldYamlData.attributes.draft : true)
     )
 
     if (oldPath) {
         winston.info('Post.save: Deleting old file at', oldPath)
-        await fs.remove(oldPath)
+        await fs.unlinkAsync(oldPath)
     }
 
     const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
@@ -57,7 +57,7 @@ const save = async(post, oldPath) => {
 const setPublish = async(path, publishStatus) => {
     let file
     try {
-        file = await fs.readFile(path, 'utf8')
+        file = await fs.readFileAsync(path, 'utf8')
     }
     catch (e) {
         winston.error('Post.save: Error while reading old file', e)
@@ -71,7 +71,7 @@ const setPublish = async(path, publishStatus) => {
     const newFile = setDraftStatus(file, yamlData.attributes.draft, !publishStatus)
 
     if (newFile !== file) {
-        await fs.writeFile(path, newFile)
+        await fs.writeFileAsync(path, newFile)
         return buildJsonResponse(frontMatter(newFile))
     }
 

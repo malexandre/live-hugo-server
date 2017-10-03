@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const fs = require('fs-extra')
+const fs = require('../promise-fs/')
 const frontMatter = require('front-matter')
 const moment = require('moment')
 const slugify = require('slugify')
@@ -9,7 +9,7 @@ const { postFolder } = require('../config')
 
 const filterAttributes = (attributes, filter = '') => {
     filter = slugify(filter)
-    const { title = '' } = attributes  // Check categories and description also?
+    const { title = '' } = attributes // Check categories and description also?
 
     if (title.includes(filter)) {
         return true
@@ -33,32 +33,34 @@ const list = async(options = {}) => {
 
     let files = []
     try {
-        files = await fs.readdir(postFolder)
+        files = await fs.readdirAsync(postFolder)
     }
     catch (e) {
         winston.error('Post.list: Error listing files from folder', e)
         throw e
     }
 
-    files.forEach(async(file) => {
+    for (let idx = 0; idx < files.length; ++idx) {
+        const file = files[idx]
+        const path = `${postFolder}/${file}`
         let data
         try {
-            data = fs.readFileSync(`${postFolder}/${file}`, 'utf8')
+            data = await fs.readFileAsync(path, 'utf8')
         }
         catch (e) {
-            winston.error('Post.list: Error while reading file', e)
-            return
+            winston.error(`Post.list: Error while reading file ${postFolder}/${file}:`, e)
+            continue
         }
         const attributes = frontMatter(data).attributes
         if (filterAttributes(attributes, filter)) {
             found.push({
-                path: `${postFolder}/${file}`,
+                path,
                 title: attributes.title,
                 date: moment(attributes.date).valueOf(),
                 categories: attributes.categories
             })
         }
-    })
+    }
 
     const ordered = _.orderBy(
         found,

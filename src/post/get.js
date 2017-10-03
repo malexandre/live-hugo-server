@@ -1,13 +1,13 @@
-const fs = require('fs-extra')
+const fs = require('../promise-fs/')
 const frontMatter = require('front-matter')
 const winston = require('winston')
 
 const buildJsonResponse = require('./build-json-response')
 
-const get = (path) => {
+const get = async(path) => {
     let file
     try {
-        file = fs.readFileSync(path, 'utf8')
+        file = await fs.readFileAsync(path, 'utf8')
     }
     catch (e) {
         winston.error('Post.save: Error while reading old file', e)
