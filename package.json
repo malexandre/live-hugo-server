@@ -18,6 +18,7 @@
     "dependencies": {
         "body-parser": "^1.18.2",
         "express": "^4.15.4",
+        "express-validator": "^4.2.1",
         "front-matter": "^2.2.0",
         "lodash": "^4.17.4",
         "mkdirp-promise": "^5.0.1",
