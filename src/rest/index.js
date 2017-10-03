@@ -1,11 +1,25 @@
 'use strict'
 
-const { list, save, setPublish } = require('../post')
+const { get, list, save, setPublish } = require('../post')
 
 const fakeHandler = (req, res) => res.sendStatus(200)
 
 const buildApi = (app) => {
-    app.get('/api/get', fakeHandler)
+    app.get('/api/get', (req, res) => {
+        const path = req.query.path
+
+        if (!path) {
+            res.status(400).send('Path is mandatory')
+            return
+        }
+
+        if (typeof path !== 'string') {
+            res.status(400).send('Path should be a string')
+            return
+        }
+
+        res.status(200).json(get(path))
+    })
 
     app.get('/api/list', async(req, res) => {
         const count = parseInt(req.query.count)
