@@ -56,7 +56,12 @@ const buildApi = (app) => {
         const { path } = req.body
 
         if (!path) {
-            res.status(400).send('Path is required')
+            res.status(400).send('Path is mandatory')
+            return
+        }
+
+        if (typeof path !== 'string') {
+            res.status(400).send('Path should be a string')
             return
         }
 
@@ -67,7 +72,17 @@ const buildApi = (app) => {
         const { post, oldPath } = req.body
 
         if (!post) {
-            res.status(400).send('Post is required')
+            res.status(400).send('Post is mandatory')
+            return
+        }
+
+        if (typeof post !== 'string') {
+            res.status(400).send('Post should be a string')
+            return
+        }
+
+        if (typeof oldPath !== 'string' && typeof oldPath !== 'undefined') {
+            res.status(400).send('oldPath should be a string')
             return
         }
 
@@ -78,7 +93,12 @@ const buildApi = (app) => {
         const { path } = req.body
 
         if (!path) {
-            res.status(400).send('Path is required')
+            res.status(400).send('Path is mandatory')
+            return
+        }
+
+        if (typeof path !== 'string') {
+            res.status(400).send('Path should be a string')
             return
         }
 
