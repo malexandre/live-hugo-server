@@ -1,6 +1,9 @@
 const { gitFilder } = require('../config')
+
+const childProcess = require('child_process')
 const fs = require('fs')
 const git = require('simple-git')(gitFilder)
+
 const { promisify } = require('util')
 
 const buildAsyncMethods = (moduleToPromisify, methods) => {
@@ -14,6 +17,7 @@ const promisifyModule = (moduleToPromisify, methods) => {
 }
 
 module.exports = {
+    childProcess: promisifyModule(childProcess, ['exec']),
     fs: promisifyModule(fs, ['readdir', 'readFile', 'rename', 'rmdir', 'stat', 'unlink', 'writeFile']),
     simpleGit: promisifyModule(git, ['commit', 'status'])
 }
