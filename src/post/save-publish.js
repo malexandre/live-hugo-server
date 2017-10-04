@@ -128,6 +128,7 @@ const setPublish = async(path, publishStatus) => {
 
     if (newFile !== file) {
         await fs.writeFileAsync(path, newFile)
+        syncFiles(`[HugoLive] ${publishStatus ? 'Publish' : 'Unpublish'} post: ${path.split('/').pop()}`)
         return buildJsonResponse(frontMatter(newFile))
     }
 
