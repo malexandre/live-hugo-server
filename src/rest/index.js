@@ -6,6 +6,7 @@ const slugify = require('slugify')
 
 const { uploadFolder } = require('../config')
 const { del, get, list, save, setPublish } = require('../post')
+const Hugo = require('../hugo')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -29,8 +30,6 @@ const upload = multer({
         cb(null, acceptedMimetype.indexOf(file.mimetype) !== -1)
     }
 })
-
-const fakeHandler = (req, res) => res.sendStatus(200)
 
 const validationHandler = (req, res, next) => {
     const errors = validationResult(req)
@@ -127,7 +126,10 @@ const buildApi = (app) => {
     app.post('/api/publish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(true))
     app.post('/api/unpublish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(false))
 
-    app.post('/api/build', fakeHandler)
+    app.post('/api/build', async(req, res) => {
+        await Hugo.build()
+        res.sendStatus(204)
+    })
     app.post('/api/upload', upload.single('new-image'), (req, res) => {
         res.status(200).send(req.file.path)
     })
