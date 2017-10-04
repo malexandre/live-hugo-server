@@ -25,6 +25,20 @@ test('Deleting an existing post should delete it in the file system', async() =>
     expect(() => fs.readFileSync(path, 'utf8')).toThrowError('ENOENT')
 })
 
+test('Deleting an existing post should delete its images in the file system', async() => {
+    const imagePath = 'assets/img/post-1/fake-image.jpg'
+    const path = 'content/post/post-1.md'
+    await Post.del(path)
+    expect(() => fs.readFileSync(path, 'utf8')).toThrowError('ENOENT')
+    expect(() => fs.readFileSync(imagePath, 'utf8')).toThrowError('ENOENT')
+})
+
+test('Deleting an existing post should delete the post even if it as no images', async() => {
+    const path = 'content/post/post-2.md'
+    await Post.del(path)
+    expect(() => fs.readFileSync(path, 'utf8')).toThrowError('ENOENT')
+})
+
 test('Deleting an existing post should call Git.syncFiles with the right commit message', async() => {
     const path = 'content/post/post-1.md'
     await Post.del(path)
