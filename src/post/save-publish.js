@@ -4,6 +4,7 @@ const slugify = require('slugify')
 const winston = require('winston')
 
 const buildJsonResponse = require('./build-json-response')
+const checkImageFolderExists = require('./check-image-folder-exists')
 const { uploadFolder, postFolder } = require('../config')
 const { syncFiles } = require('../git')
 
@@ -59,8 +60,6 @@ const save = async(post, oldPath) => {
     const filename = `${slug}.md`
     const oldFilename = oldPath ? oldPath.split('/').pop() : undefined
     const path = `${postFolder}/${filename}`
-    const imagePath = `${uploadFolder}/${slug}`
-    const oldImagePath = oldFilename ? `${uploadFolder}/${oldFilename.replace(/\.md$/, '')}` : undefined
     let commitMessage = `[HugoLive] ${oldPath ? 'Edit' : 'New'} post: ${filename}`
 
     await checkIfPathIsAlreadyUsed(path, oldPath)
@@ -78,24 +77,9 @@ const save = async(post, oldPath) => {
         await fs.unlinkAsync(oldPath)
         commitMessage = `[HugoLive] Move post: ${oldFilename} to ${filename}`
 
-        winston.info('Post.save: Check if images folder exists')
-        let exists = false
-        try {
-            const stats = await fs.statAsync(oldImagePath)
-            if (!stats.isDirectory()) {
-                throw new Error('Post.save: Old image path is not a folder', oldImagePath)
-            }
-            exists = true
-        }
-        catch (e) {
-            // Folder don't exist, do nothing
-            if (e.message.includes('Post.save')) {
-                winston.error(e)
-            }
-            winston.info('Post.save: No image folder!', e)
-        }
-
-        if (exists) {
+        const imagePath = `${uploadFolder}/${slug}`
+        const oldImagePath = oldFilename ? `${uploadFolder}/${oldFilename.replace(/\.md$/, '')}` : undefined
+        if (oldImagePath && (await checkImageFolderExists(oldImagePath))) {
             winston.info(`Post.save: moving ${oldImagePath} to ${imagePath}`)
             await fs.renameAsync(oldImagePath, imagePath)
         }
