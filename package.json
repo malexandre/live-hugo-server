@@ -23,6 +23,7 @@
         "lodash": "^4.17.4",
         "moment": "^2.18.1",
         "multer": "^1.3.0",
+        "simple-git": "^1.77.0",
         "slugify": "^1.2.1",
         "winston": "^2.3.1"
     },
