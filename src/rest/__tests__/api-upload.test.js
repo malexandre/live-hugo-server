@@ -7,6 +7,11 @@ const supertest = require('supertest')
 const Api = require('../')
 let app
 
+jest.mock('../../config', () => ({
+    postFolder: 'content/post',
+    uploadFolder: 'assets/img'
+}))
+
 beforeAll(() => {
     app = express()
     app.use(bodyParser.urlencoded({ extended: true }))

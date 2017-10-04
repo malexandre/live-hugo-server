@@ -3,6 +3,11 @@ const mockFs = require('mock-fs')
 const Post = require('../')
 const { initMockFs } = require('./setup-common')
 
+jest.mock('../../config', () => ({
+    postFolder: 'content/post',
+    uploadFolder: 'assets/img'
+}))
+
 beforeEach(() => initMockFs())
 afterEach(() => mockFs.restore())
 
