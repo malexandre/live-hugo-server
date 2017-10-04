@@ -109,16 +109,51 @@ test('Saving an existing post with a new name should move the file on the fs', a
     expect(() => fs.readFileSync(oldPath, 'utf8')).toThrowError('ENOENT')
 })
 
+test('Saving an existing post with a new name should move the images on the fs', async() => {
+    const newImagePath = 'assets/img/new-post-1/fake-image.jpg'
+    const oldImagePath = 'assets/img/post-1/fake-image.jpg'
+    const oldImageData = fs.readFileSync(oldImagePath, 'utf8')
+    const sentData = generatePost(
+        1,
+        'New Post 1',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    await Post.save(sentData, 'content/post/post-1.md')
+    const data = fs.readFileSync(newImagePath, 'utf8')
+    expect(data).toBe(oldImageData)
+    expect(() => fs.readFileSync(oldImagePath, 'utf8')).toThrowError('ENOENT')
+})
+
+test('Saving an existing post with a new name should work with a post without image folder', async() => {
+    const oldPath = 'content/post/post-2.md'
+    const oldData = fs.readFileSync(oldPath, 'utf8')
+    const sentData = generatePost(
+        1,
+        'New Post 2',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    await Post.save(sentData, oldPath)
+    const data = fs.readFileSync('content/post/new-post-2.md', 'utf8')
+    expect(data).toBe(sentData)
+    expect(data).not.toBe(oldData)
+    expect(() => fs.readFileSync(oldPath, 'utf8')).toThrowError('ENOENT')
+})
+
 test('Saving an existing post with a new name already used by another post should throw an error', async() => {
     const oldPath = 'content/post/post-1.md'
     const oldData = fs.readFileSync(oldPath, 'utf8')
+    const newImagePath = 'assets/img/post-2/fake-image.jpg'
+    const oldImagePath = 'assets/img/post-1/fake-image.jpg'
+    const oldImageData = fs.readFileSync(oldImagePath, 'utf8')
     const sentData = generatePost(
         1,
         'Post 2',
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     )
-    expect.assertions(3)
+    expect.assertions(5)
     try {
         await Post.save(sentData, oldPath)
     }
@@ -128,6 +163,8 @@ test('Saving an existing post with a new name already used by another post shoul
     const data = fs.readFileSync(oldPath, 'utf8')
     expect(data).not.toBe(sentData)
     expect(data).toBe(oldData)
+    expect(fs.readFileSync(oldImagePath, 'utf8')).toBe(oldImageData)
+    expect(() => fs.readFileSync(newImagePath, 'utf8')).toThrowError('ENOENT')
 })
 
 test('Saving an non-existing post with a wrong oldName should throw an error', async() => {

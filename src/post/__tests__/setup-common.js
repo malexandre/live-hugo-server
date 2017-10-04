@@ -30,6 +30,13 @@ const initMockFs = () => {
     mockFs({
         content: {
             post: posts
+        },
+        assets: {
+            img: {
+                'post-1': {
+                    'fake-image.jpg': 'image content'
+                }
+            }
         }
     })
 }
