@@ -5,7 +5,7 @@ const multer = require('multer')
 const slugify = require('slugify')
 
 const { uploadFolder } = require('../config')
-const { get, list, save, setPublish } = require('../post')
+const { del, get, list, save, setPublish } = require('../post')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -38,6 +38,12 @@ const validationHandler = (req, res, next) => {
         return res.status(400).json({ errors: errors.mapped() })
     }
     next()
+}
+
+const apiDelete = async(req, res) => {
+    const path = req.query.path
+    await del(path)
+    res.sendStatus(204)
 }
 
 const apiGet = (req, res) => {
@@ -116,7 +122,7 @@ const buildApi = (app) => {
         validationHandler,
         apiSave
     )
-    app.delete('/api/delete', [checkString('path', 'path is required')], validationHandler, fakeHandler)
+    app.delete('/api/delete', [checkString('path', 'path is required')], validationHandler, apiDelete)
 
     app.post('/api/publish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(true))
     app.post('/api/unpublish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(false))
