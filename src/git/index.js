@@ -1,4 +1,4 @@
-const simpleGit = require('../promise-simple-git')
+const simpleGit = require('../promisified-libs/simple-git')
 const winston = require('winston')
 
 const syncFiles = async(message) => {

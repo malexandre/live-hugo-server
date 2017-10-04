@@ -1,7 +1,7 @@
-const simpleGit = require('../../promise-simple-git/')
+const simpleGit = require('../../promisified-libs/simple-git')
 const git = require('../')
 
-jest.mock('../../promise-simple-git/', () => ({
+jest.mock('../../promisified-libs/simple-git', () => ({
     commitAsync: jest.fn(),
     statusAsync: () => ({
         not_added: ['file1', 'file2'], // eslint-disable-line camelcase

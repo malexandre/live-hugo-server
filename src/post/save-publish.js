@@ -1,4 +1,4 @@
-const fs = require('../promise-fs/')
+const fs = require('../promisified-libs/fs')
 const frontMatter = require('front-matter')
 const slugify = require('slugify')
 const winston = require('winston')

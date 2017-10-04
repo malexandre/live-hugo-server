@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const fs = require('../promise-fs/')
+const fs = require('../promisified-libs/fs')
 const frontMatter = require('front-matter')
 const moment = require('moment')
 const slugify = require('slugify')
