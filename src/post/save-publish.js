@@ -5,6 +5,7 @@ const winston = require('winston')
 
 const buildJsonResponse = require('./build-json-response')
 const { uploadFolder, postFolder } = require('../config')
+const { syncFiles } = require('../git')
 
 const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) => {
     if (!isAlreadyDraft && isOldVersionDraft) {
@@ -60,6 +61,7 @@ const save = async(post, oldPath) => {
     const path = `${postFolder}/${filename}`
     const imagePath = `${uploadFolder}/${slug}`
     const oldImagePath = oldFilename ? `${uploadFolder}/${oldFilename.replace(/\.md$/, '')}` : undefined
+    let commitMessage = `[HugoLive] ${oldPath ? 'Edit' : 'New'} post: ${filename}`
 
     await checkIfPathIsAlreadyUsed(path, oldPath)
 
@@ -74,6 +76,7 @@ const save = async(post, oldPath) => {
     if (oldPath && oldPath !== path) {
         winston.info('Post.save: Deleting old file at', oldPath)
         await fs.unlinkAsync(oldPath)
+        commitMessage = `[HugoLive] Move post: ${oldFilename} to ${filename}`
 
         winston.info('Post.save: Check if images folder exists')
         let exists = false
@@ -97,6 +100,8 @@ const save = async(post, oldPath) => {
             await fs.renameAsync(oldImagePath, imagePath)
         }
     }
+
+    await syncFiles(commitMessage)
 
     const postJson = Object.assign({ content: yamlData.body }, yamlData.attributes)
     if (postJson.categories) {

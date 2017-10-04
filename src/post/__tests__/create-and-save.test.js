@@ -1,6 +1,7 @@
 const fs = require('fs')
 const mockFs = require('mock-fs')
 const Post = require('../')
+const Git = require('../../git')
 const { generatePost, initMockFs } = require('./setup-common')
 
 jest.mock('../../config', () => ({
@@ -8,8 +9,15 @@ jest.mock('../../config', () => ({
     uploadFolder: 'assets/img'
 }))
 
+jest.mock('../../git', () => ({
+    syncFiles: jest.fn()
+}))
+
 beforeEach(() => initMockFs())
-afterEach(() => mockFs.restore())
+afterEach(() => {
+    mockFs.restore()
+    Git.syncFiles.mockClear()
+})
 
 test('Creating a new post should return the new post JSON with the tile', async() => {
     const resp = await Post.save(generatePost(16, 'Post Test'))
@@ -41,6 +49,11 @@ test('Creating a new post should write the file on the fs', async() => {
     await Post.save(sentData)
     const data = fs.readFileSync('content/post/post-test.md', 'utf8')
     expect(data).toBe(sentData.replace('---', '---\ndraft: true'))
+})
+
+test('Creating a new post should call Git.syncFiles with the right commit message', async() => {
+    await Post.save(generatePost(16, 'Post Test', undefined, 'Test content'))
+    expect(Git.syncFiles).toBeCalledWith('[HugoLive] New post: post-test.md')
 })
 
 test('Saving an existing post should return the new post JSON with the tile', async() => {
@@ -98,6 +111,11 @@ test('Saving an existing post should write the file on the fs', async() => {
     expect(data).not.toBe(oldData)
 })
 
+test('Saving an existing post should call Git.syncFiles with the right commit message', async() => {
+    await Post.save(generatePost(1, 'Post 1'), 'content/post/post-1.md')
+    expect(Git.syncFiles).toBeCalledWith('[HugoLive] Edit post: post-1.md')
+})
+
 test('Saving an existing post with a new name should move the file on the fs', async() => {
     const oldPath = 'content/post/post-1.md'
     const oldData = fs.readFileSync(oldPath, 'utf8')
@@ -146,6 +164,11 @@ test('Saving an existing post with a new name should work with a post without im
     expect(() => fs.readFileSync(oldPath, 'utf8')).toThrowError('ENOENT')
 })
 
+test('Saving an existing post with a new name should call Git.syncFiles with the right commit message', async() => {
+    await Post.save(generatePost(1, 'New Post 1'), 'content/post/post-1.md')
+    expect(Git.syncFiles).toBeCalledWith('[HugoLive] Move post: post-1.md to new-post-1.md')
+})
+
 test('Saving an existing post with a new name already used by another post should throw an error', async() => {
     const oldPath = 'content/post/post-1.md'
     const oldData = fs.readFileSync(oldPath, 'utf8')
@@ -158,7 +181,7 @@ test('Saving an existing post with a new name already used by another post shoul
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     )
-    expect.assertions(5)
+    expect.assertions(6)
     try {
         await Post.save(sentData, oldPath)
     }
@@ -170,16 +193,18 @@ test('Saving an existing post with a new name already used by another post shoul
     expect(data).toBe(oldData)
     expect(fs.readFileSync(oldImagePath, 'utf8')).toBe(oldImageData)
     expect(() => fs.readFileSync(newImagePath, 'utf8')).toThrowError('ENOENT')
+    expect(Git.syncFiles).not.toBeCalled()
 })
 
 test('Saving an non-existing post with a wrong oldName should throw an error', async() => {
-    expect.assertions(1)
+    expect.assertions(2)
     try {
         await Post.save(generatePost(20, 'Test Post'), 'fake path')
     }
     catch (e) {
         expect(e.code).toBe('ENOENT')
     }
+    expect(Git.syncFiles).not.toBeCalled()
 })
 
 test('Saving an existing post without draft status should keep the same draft status on the fs', async() => {
