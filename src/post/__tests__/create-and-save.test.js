@@ -40,49 +40,55 @@ test('Creating a new post should write the file on the fs', async() => {
 
 test('Saving an existing post should return the new post JSON with the tile', async() => {
     const resp = await Post.save(
-        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content')
+        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content'),
+        'content/post/post-1.md'
     )
     expect(resp.title).toBe('Post 1')
 })
 
 test('Saving an existing post should return the new post JSON with the categories', async() => {
     const resp = await Post.save(
-        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content')
+        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content'),
+        'content/post/post-1.md'
     )
     expect(resp.categories).toEqual(['Cat 1', 'Cat 2'])
 })
 
 test('Saving an existing post should return the new post JSON with the description', async() => {
     const resp = await Post.save(
-        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content')
+        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content'),
+        'content/post/post-1.md'
     )
     expect(resp.description).toBe('My description')
 })
 
 test('Saving an existing post should return the new post JSON with the content', async() => {
     const resp = await Post.save(
-        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content')
+        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content'),
+        'content/post/post-1.md'
     )
     expect(resp.content).toBe('Test content')
 })
 
 test('Saving an existing post should return the new post JSON with the date', async() => {
     const resp = await Post.save(
-        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content')
+        generatePost(1, 'Post 1', { categories: ['Cat 1', 'Cat 2'], description: 'My description' }, 'Test content'),
+        'content/post/post-1.md'
     )
     expect(resp.date).toEqual(new Date(1 * 1000))
 })
 
 test('Saving an existing post should write the file on the fs', async() => {
-    const oldData = fs.readFileSync('content/post/post-1.md', 'utf8')
+    const oldPath = 'content/post/post-1.md'
+    const oldData = fs.readFileSync(oldPath, 'utf8')
     const sentData = generatePost(
         1,
         'Post 1',
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     )
-    await Post.save(sentData)
-    const data = fs.readFileSync('content/post/post-1.md', 'utf8')
+    await Post.save(sentData, oldPath)
+    const data = fs.readFileSync(oldPath, 'utf8')
     expect(data).toBe(sentData)
     expect(data).not.toBe(oldData)
 })
@@ -103,6 +109,27 @@ test('Saving an existing post with a new name should move the file on the fs', a
     expect(() => fs.readFileSync(oldPath, 'utf8')).toThrowError('ENOENT')
 })
 
+test('Saving an existing post with a new name already used by another post should throw an error', async() => {
+    const oldPath = 'content/post/post-1.md'
+    const oldData = fs.readFileSync(oldPath, 'utf8')
+    const sentData = generatePost(
+        1,
+        'Post 2',
+        { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
+        'Test content'
+    )
+    expect.assertions(3)
+    try {
+        await Post.save(sentData, oldPath)
+    }
+    catch (e) {
+        expect(e.message.includes('Post.save: Path already used by another file')).toBe(true)
+    }
+    const data = fs.readFileSync(oldPath, 'utf8')
+    expect(data).not.toBe(sentData)
+    expect(data).toBe(oldData)
+})
+
 test('Saving an non-existing post with a wrong oldName should throw an error', async() => {
     expect.assertions(1)
     try {
@@ -120,7 +147,7 @@ test('Saving an existing post without draft status should keep the same draft st
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     )
-    await Post.save(sentNotDraftData)
+    await Post.save(sentNotDraftData, 'content/post/post-1.md')
     const notDraftData = fs.readFileSync('content/post/post-1.md', 'utf8')
     expect(notDraftData).toBe(sentNotDraftData)
 
@@ -130,7 +157,7 @@ test('Saving an existing post without draft status should keep the same draft st
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     )
-    await Post.save(sentDraftData)
+    await Post.save(sentDraftData, 'content/post/random-6.md')
     const data = fs.readFileSync('content/post/random-6.md', 'utf8')
     expect(data).toBe(sentDraftData.replace('---', '---\ndraft: true'))
 })
@@ -142,7 +169,7 @@ test('Saving an existing post with a changed draft status should keep the same d
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     )
-    await Post.save(sentNotDraftData.replace('---', '---\ndraft: true'))
+    await Post.save(sentNotDraftData.replace('---', '---\ndraft: true'), 'content/post/post-1.md')
     const notDraftData = fs.readFileSync('content/post/post-1.md', 'utf8')
     expect(notDraftData).toBe(sentNotDraftData)
 
@@ -152,7 +179,7 @@ test('Saving an existing post with a changed draft status should keep the same d
         { categories: ['Cat 1', 'Cat 2'], description: 'My description' },
         'Test content'
     ).replace('---', '---\ndraft: false')
-    await Post.save(sentDraftData)
+    await Post.save(sentDraftData, 'content/post/random-6.md')
     const data = fs.readFileSync('content/post/random-6.md', 'utf8')
     expect(data).toBe(sentDraftData.replace('---', '---\ndraft: true'))
 })

@@ -19,11 +19,7 @@ const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) 
     return post
 }
 
-const save = async(post, oldPath) => {
-    const yamlData = frontMatter(post)
-    const filename = `${slugify(yamlData.attributes.title.toLowerCase())}.md`
-    const path = `${postFolder}/${filename}`
-
+const getOldFileYamlData = async(path, oldPath) => {
     let oldFile
     try {
         oldFile = await fs.readFileAsync(oldPath || path, 'utf8')
@@ -34,7 +30,36 @@ const save = async(post, oldPath) => {
             throw e
         }
     }
-    const oldYamlData = oldFile ? frontMatter(oldFile) : undefined
+    return oldFile ? frontMatter(oldFile) : undefined
+}
+
+const checkIfPathIsAlreadyUsed = async(path, oldPath) => {
+    if (path === oldPath) {
+        // No error to throw
+        return
+    }
+
+    try {
+        await fs.readFileAsync(path, 'utf8')
+    }
+    catch (e) {
+        if (e.message.includes('ENOENT')) {
+            // No error to throw
+            return
+        }
+    }
+
+    throw new Error('Post.save: Path already used by another file', path)
+}
+
+const save = async(post, oldPath) => {
+    const yamlData = frontMatter(post)
+    const filename = `${slugify(yamlData.attributes.title.toLowerCase())}.md`
+    const path = `${postFolder}/${filename}`
+
+    await checkIfPathIsAlreadyUsed(path, oldPath)
+
+    const oldYamlData = await getOldFileYamlData(path, oldPath)
 
     winston.info(`Post.save: Saving post ${filename} (${oldYamlData ? 'edit' : 'new'}):`, yamlData)
     await fs.writeFileAsync(
@@ -42,7 +67,7 @@ const save = async(post, oldPath) => {
         setDraftStatus(post, yamlData.attributes.draft, oldYamlData ? !!oldYamlData.attributes.draft : true)
     )
 
-    if (oldPath) {
+    if (oldPath && oldPath !== path) {
         winston.info('Post.save: Deleting old file at', oldPath)
         await fs.unlinkAsync(oldPath)
     }
