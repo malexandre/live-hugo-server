@@ -12,6 +12,10 @@ jest.mock('../../config', () => ({
     uploadFolder: 'assets/img'
 }))
 
+jest.mock('../../git', () => ({
+    syncFiles: jest.fn()
+}))
+
 beforeAll(() => {
     app = express()
     app.use(bodyParser.urlencoded({ extended: true }))

@@ -7,6 +7,10 @@ jest.mock('../../config', () => ({
     uploadFolder: 'assets/img'
 }))
 
+jest.mock('../../git', () => ({
+    syncFiles: jest.fn()
+}))
+
 beforeEach(() => initMockFs())
 afterEach(() => mockFs.restore())
 
