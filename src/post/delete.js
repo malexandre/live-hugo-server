@@ -1,4 +1,4 @@
-const fs = require('../promisified-libs/fs')
+const { fs } = require('../promisified-libs')
 const path = require('path')
 const winston = require('winston')
 

@@ -1,4 +1,4 @@
-const fs = require('../promisified-libs/fs')
+const { fs } = require('../promisified-libs')
 const winston = require('winston')
 
 const checkImageFolderExists = async(imageFolder) => {
