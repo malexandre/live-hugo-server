@@ -18,6 +18,6 @@ const promisifyModule = (moduleToPromisify, methods) => {
 
 module.exports = {
     childProcess: promisifyModule(childProcess, ['exec']),
-    fs: promisifyModule(fs, ['readdir', 'readFile', 'rename', 'rmdir', 'stat', 'unlink', 'writeFile']),
+    fs: promisifyModule(fs, ['mkdir', 'readdir', 'readFile', 'rename', 'rmdir', 'stat', 'unlink', 'writeFile']),
     simpleGit: promisifyModule(git, ['commit', 'status'])
 }

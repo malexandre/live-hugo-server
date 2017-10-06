@@ -4,20 +4,22 @@ const { check, validationResult } = require('express-validator/check')
 const multer = require('multer')
 const slugify = require('slugify')
 
+const { fs } = require('../promisified-libs')
 const { uploadFolder } = require('../config')
 const { del, get, list, save, setPublish } = require('../post')
+const checkDirExists = require('../post/check-image-folder-exists')
 const Hugo = require('../hugo')
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let postName = req.body.postName
-
-        if (typeof postName !== 'string' || !postName) {
-            postName = undefined
-        }
-
+    destination: async(req, file, cb) => {
+        const postName = req.body.postName
         const postSlug = postName ? `${slugify(postName)}/`.toLowerCase() : ''
         const destFolder = `${uploadFolder}/${postSlug}`
+
+        if (postName && !await checkDirExists(destFolder)) {
+            await fs.mkdirAsync(destFolder)
+        }
+
         cb(null, destFolder)
     },
     filename: (req, file, cb) => cb(null, file.originalname)
@@ -130,9 +132,15 @@ const buildApi = (app) => {
         await Hugo.build()
         res.sendStatus(204)
     })
-    app.post('/api/upload', upload.single('new-image'), (req, res) => {
-        res.status(200).send(req.file.path)
-    })
+    app.post(
+        '/api/upload',
+        [checkString('postName', 'postName must be valid string').optional()],
+        validationHandler,
+        upload.single('new-image'),
+        (req, res) => {
+            res.status(200).send(req.file.path)
+        }
+    )
 }
 
 module.exports = { buildApi }
