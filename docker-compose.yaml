@@ -1,0 +1,13 @@
+version: '2'
+services:
+  web:
+    build: .
+    ports:
+     - "3000:3000"
+    volumes:
+    - ".:/code"
+    command: nodemon src/index.js
+  redis:
+    image: "redis:alpine"
+    volumes:
+    - "./db:/data"
