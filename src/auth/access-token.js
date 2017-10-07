@@ -7,7 +7,7 @@ const { checkRefreshToken } = require('../db/refresh-token')
 const { user } = require('../db')
 
 const jwtOptions = {}
-jwtOptions.jwtFromRequest = passportJWT.ExtractJwt.fromAuthHeaderWithScheme('jwt')
+jwtOptions.jwtFromRequest = passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = jwtSecret
 
 const getNewAccessToken = async(email, refreshToken) => {
@@ -15,11 +15,11 @@ const getNewAccessToken = async(email, refreshToken) => {
         winston.warn('getNewAccessToken: Invalid refresh token')
         return
     }
-    return jwt.sign({ email }, jwtSecret, { expiresIn: `${tokenExpiration.access}s` })
+    return jwt.sign({ email }, jwtSecret, { expiresIn: tokenExpiration.access, algorithm: 'HS512' })
 }
 
-const strategy = new passportJWT.Strategy(jwtOptions, function(payload, next) {
-    const dbUser = user.get(payload.email)
+const strategy = new passportJWT.Strategy(jwtOptions, async(payload, next) => {
+    const dbUser = await user.getUser(payload.email)
     if (dbUser) {
         next(null, dbUser)
     }
