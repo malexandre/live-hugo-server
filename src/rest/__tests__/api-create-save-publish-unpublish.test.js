@@ -11,6 +11,14 @@ jest.mock('../../post', () => ({
     setPublish: jest.fn()
 }))
 
+jest.mock('../../config', () => ({
+    folders: {
+        post: 'content/post',
+        upload: 'assets/img',
+        git: './'
+    }
+}))
+
 beforeAll(() => {
     app = express()
     app.use(bodyParser.urlencoded({ extended: true }))

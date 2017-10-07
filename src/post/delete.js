@@ -2,7 +2,7 @@ const { fs } = require('../promisified-libs')
 const path = require('path')
 const winston = require('winston')
 
-const { uploadFolder } = require('../config')
+const { folders } = require('../config')
 const checkImageFolderExists = require('./check-image-folder-exists')
 const { syncFiles } = require('../git')
 
@@ -28,7 +28,7 @@ const rmdir = async(dir) => {
 const del = async(path) => {
     try {
         const filename = `${path.split('/').pop()}`
-        const imageFolder = `${uploadFolder}/${filename.replace(/\.md$/, '')}`
+        const imageFolder = `${folders.upload}/${filename.replace(/\.md$/, '')}`
         await fs.unlinkAsync(path)
         await syncFiles(`[HugoLive] Delete post: ${filename}`)
         if (await checkImageFolderExists(imageFolder)) {

@@ -3,8 +3,10 @@ const Post = require('../')
 const { initMockFs } = require('./setup-common')
 
 jest.mock('../../config', () => ({
-    postFolder: 'content/post',
-    uploadFolder: 'assets/img'
+    folders: {
+        post: 'content/post',
+        upload: 'assets/img'
+    }
 }))
 
 jest.mock('../../git', () => ({

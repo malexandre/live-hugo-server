@@ -5,7 +5,7 @@ const moment = require('moment')
 const slugify = require('slugify')
 const winston = require('winston')
 
-const { postFolder } = require('../config')
+const { folders } = require('../config')
 
 const filterAttributes = (attributes, filter = '') => {
     filter = slugify(filter)
@@ -25,7 +25,7 @@ const list = async(options = {}) => {
 
     let files = []
     try {
-        files = await fs.readdirAsync(postFolder)
+        files = await fs.readdirAsync(folders.post)
     }
     catch (e) {
         winston.error('Post.list: Error listing files from folder', e)
@@ -34,13 +34,13 @@ const list = async(options = {}) => {
 
     for (let idx = 0; idx < files.length; ++idx) {
         const file = files[idx]
-        const path = `${postFolder}/${file}`
+        const path = `${folders.post}/${file}`
         let data
         try {
             data = await fs.readFileAsync(path, 'utf8')
         }
         catch (e) {
-            winston.error(`Post.list: Error while reading file ${postFolder}/${file}:`, e)
+            winston.error(`Post.list: Error while reading file ${folders.post}/${file}:`, e)
             continue
         }
         const attributes = frontMatter(data).attributes

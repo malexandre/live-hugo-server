@@ -1,12 +1,17 @@
 const childProcess = require('child_process')
 const hugo = require('../')
 
-jest.mock('../../config', () => ({
-    buildCmd: 'hugo'
-}))
-
 jest.mock('child_process', () => ({
     exec: jest.fn()
+}))
+
+jest.mock('../../config', () => ({
+    buildCmd: 'hugo',
+    folders: {
+        post: 'content/post',
+        upload: 'assets/img',
+        git: './'
+    }
 }))
 
 afterEach(() => {

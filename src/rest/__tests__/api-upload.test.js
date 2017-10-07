@@ -8,8 +8,11 @@ const Api = require('../')
 let app
 
 jest.mock('../../config', () => ({
-    postFolder: 'content/post',
-    uploadFolder: 'assets/img'
+    folders: {
+        post: 'content/post',
+        upload: 'assets/img',
+        git: './'
+    }
 }))
 
 jest.mock('../../git', () => ({

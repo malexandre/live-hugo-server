@@ -1,8 +1,8 @@
-const { gitFilder } = require('../config')
+const { folders } = require('../config')
 
 const childProcess = require('child_process')
 const fs = require('fs')
-const git = require('simple-git')(gitFilder)
+const git = require('simple-git')(folders.git)
 
 const { promisify } = require('util')
 

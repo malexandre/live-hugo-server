@@ -5,7 +5,7 @@ const winston = require('winston')
 
 const buildJsonResponse = require('./build-json-response')
 const checkImageFolderExists = require('./check-image-folder-exists')
-const { uploadFolder, postFolder } = require('../config')
+const { folders } = require('../config')
 const { syncFiles } = require('../git')
 
 const setDraftStatus = (post, isAlreadyDraft = false, isOldVersionDraft = true) => {
@@ -59,7 +59,7 @@ const save = async(post, oldPath) => {
     const slug = slugify(yamlData.attributes.title.toLowerCase())
     const filename = `${slug}.md`
     const oldFilename = oldPath ? oldPath.split('/').pop() : undefined
-    const path = `${postFolder}/${filename}`
+    const path = `${folders.post}/${filename}`
     let commitMessage = `[HugoLive] ${oldPath ? 'Edit' : 'New'} post: ${filename}`
 
     await checkIfPathIsAlreadyUsed(path, oldPath)
@@ -77,8 +77,8 @@ const save = async(post, oldPath) => {
         await fs.unlinkAsync(oldPath)
         commitMessage = `[HugoLive] Move post: ${oldFilename} to ${filename}`
 
-        const imagePath = `${uploadFolder}/${slug}`
-        const oldImagePath = oldFilename ? `${uploadFolder}/${oldFilename.replace(/\.md$/, '')}` : undefined
+        const imagePath = `${folders.upload}/${slug}`
+        const oldImagePath = oldFilename ? `${folders.upload}/${oldFilename.replace(/\.md$/, '')}` : undefined
         if (oldImagePath && (await checkImageFolderExists(oldImagePath))) {
             winston.info(`Post.save: moving ${oldImagePath} to ${imagePath}`)
             await fs.renameAsync(oldImagePath, imagePath)

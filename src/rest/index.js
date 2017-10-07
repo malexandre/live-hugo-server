@@ -5,7 +5,7 @@ const multer = require('multer')
 const slugify = require('slugify')
 
 const { fs } = require('../promisified-libs')
-const { uploadFolder } = require('../config')
+const { folders } = require('../config')
 const { del, get, list, save, setPublish } = require('../post')
 const checkDirExists = require('../post/check-image-folder-exists')
 const Hugo = require('../hugo')
@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
     destination: async(req, file, cb) => {
         const postName = req.body.postName
         const postSlug = postName ? `${slugify(postName)}/`.toLowerCase() : ''
-        const destFolder = `${uploadFolder}/${postSlug}`
+        const destFolder = `${folders.upload}/${postSlug}`
 
         if (postName && !await checkDirExists(destFolder)) {
             await fs.mkdirAsync(destFolder)
