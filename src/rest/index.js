@@ -106,10 +106,17 @@ const checkInteger = (varName) =>
         .isInt({ gt: 0 })
         .toInt()
 
-const buildApi = (app) => {
-    app.get('/api/get', [checkString('path', 'path is required')], validationHandler, apiGet)
+const buildApi = (app, passport) => {
+    app.get(
+        '/api/get',
+        passport.authenticate('jwt', { session: false }),
+        [checkString('path', 'path is required')],
+        validationHandler,
+        apiGet
+    )
     app.get(
         '/api/list',
+        passport.authenticate('jwt', { session: false }),
         [
             checkInteger('offset', 'offset must be a positive integer').optional(),
             checkInteger('count', 'offset must be a positive integer').optional()
@@ -119,21 +126,41 @@ const buildApi = (app) => {
     )
     app.post(
         '/api/save',
+        passport.authenticate('jwt', { session: false }),
         [checkString('post', 'path is required'), checkString('oldPath', 'oldPath must be valid string').optional()],
         validationHandler,
         apiSave
     )
-    app.delete('/api/delete', [checkString('path', 'path is required')], validationHandler, apiDelete)
+    app.delete(
+        '/api/delete',
+        passport.authenticate('jwt', { session: false }),
+        [checkString('path', 'path is required')],
+        validationHandler,
+        apiDelete
+    )
 
-    app.post('/api/publish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(true))
-    app.post('/api/unpublish', [checkString('path', 'path is required')], validationHandler, apiSetPublish(false))
+    app.post(
+        '/api/publish',
+        passport.authenticate('jwt', { session: false }),
+        [checkString('path', 'path is required')],
+        validationHandler,
+        apiSetPublish(true)
+    )
+    app.post(
+        '/api/unpublish',
+        passport.authenticate('jwt', { session: false }),
+        [checkString('path', 'path is required')],
+        validationHandler,
+        apiSetPublish(false)
+    )
 
-    app.post('/api/build', async(req, res) => {
+    app.post('/api/build', passport.authenticate('jwt', { session: false }), async(req, res) => {
         await Hugo.build()
         res.sendStatus(204)
     })
     app.post(
         '/api/upload',
+        passport.authenticate('jwt', { session: false }),
         [checkString('postName', 'postName must be valid string').optional()],
         validationHandler,
         upload.single('new-image'),

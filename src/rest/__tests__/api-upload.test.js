@@ -38,11 +38,17 @@ const rmdir = (dir) => {
     fs.rmdirSync(dir)
 }
 
+const fakePassport = {
+    authenticate: () => (req, res, next) => {
+        next()
+    }
+}
+
 beforeAll(() => {
     app = express()
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
-    Api.buildApi(app)
+    Api.buildApi(app, fakePassport)
 })
 
 // Multer seems to go through MockFS and write in the disk. Cleaning the file

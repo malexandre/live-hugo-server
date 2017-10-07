@@ -19,11 +19,17 @@ jest.mock('../../config', () => ({
     }
 }))
 
+const fakePassport = {
+    authenticate: () => (req, res, next) => {
+        next()
+    }
+}
+
 beforeAll(() => {
     app = express()
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use(bodyParser.json())
-    Api.buildApi(app)
+    Api.buildApi(app, fakePassport)
 })
 
 beforeEach(() => {
