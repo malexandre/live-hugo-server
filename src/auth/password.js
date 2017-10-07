@@ -1,11 +1,11 @@
 const passportLocal = require('passport-local')
 
 const { newRefreshToken, saveRefreshToken } = require('../db/refresh-token')
-const { checkUser, get } = require('../db/user')
+const { checkUser, getUser } = require('../db/user')
 
-const getNewRefreshToken = (email) => {
-    const token = newRefreshToken(email)
-    saveRefreshToken(token)
+const getNewRefreshToken = async(email) => {
+    const token = await newRefreshToken(email)
+    token.salt = await saveRefreshToken(token)
     return token
 }
 
@@ -20,7 +20,7 @@ const strategy = new passportLocal.Strategy(
             next(null, false)
         }
         else {
-            next(null, await get(email))
+            next(null, await getUser(email))
         }
     }
 )
