@@ -1,57 +1,9 @@
-'use strict'
-
-const { check, validationResult } = require('express-validator/check')
-const multer = require('multer')
-const slugify = require('slugify')
+const { checkInteger, checkString, validationHandler } = require('./validation')
+const upload = require('./upload')
 
 const asyncMiddleware = require('../async-middleware')
-const { fs } = require('../promisified-libs')
-const { folders } = require('../config')
-const { del, get, list, save, setPublish } = require('../post')
-const checkDirExists = require('../post/check-image-folder-exists')
+const Post = require('../post')
 const Hugo = require('../hugo')
-
-const storage = multer.diskStorage({
-    destination: async(req, file, cb) => {
-        const postName = req.body.postName
-        const postSlug = postName ? `${slugify(postName)}/`.toLowerCase() : ''
-        const destFolder = `${folders.upload}/${postSlug}`
-
-        if (postName && !await checkDirExists(destFolder)) {
-            await fs.mkdirAsync(destFolder)
-        }
-
-        cb(null, destFolder)
-    },
-    filename: (req, file, cb) => cb(null, file.originalname)
-})
-
-const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        const acceptedMimetype = ['image/gif', 'image/jpeg', 'image/png', 'image/webp']
-        cb(null, acceptedMimetype.indexOf(file.mimetype) !== -1)
-    }
-})
-
-const validationHandler = (req, res, next) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.mapped() })
-    }
-    next()
-}
-
-const apiDelete = async(req, res) => {
-    const path = req.query.path
-    await del(path)
-    res.sendStatus(204)
-}
-
-const apiGet = async(req, res) => {
-    const path = req.query.path
-    res.status(200).json(await get(path))
-}
 
 const apiList = async(req, res) => {
     const count = parseInt(req.query.count)
@@ -69,7 +21,7 @@ const apiList = async(req, res) => {
         orderby = req.query.orderby
     }
 
-    const results = await list({
+    const results = await Post.list({
         filter: req.query.filter,
         orderby: orderby,
         offset: !isNaN(offset) && offset >= 0 ? offset : 0,
@@ -79,33 +31,12 @@ const apiList = async(req, res) => {
     res.status(200).json(results)
 }
 
-const apiSave = async(req, res) => {
-    const { post, oldPath } = req.body
-    res.status(200).json(await save(post, oldPath))
-}
-
 const apiSetPublish = (publishStatus) => {
     return async(req, res) => {
         const { path } = req.body
-        res.status(200).json(await setPublish(path, publishStatus))
+        res.status(200).json(await Post.setPublish(path, publishStatus))
     }
 }
-
-const checkString = (varName) =>
-    check(varName)
-        .exists()
-        .trim()
-        .not()
-        .isEmpty()
-
-const checkInteger = (varName) =>
-    check(varName)
-        .exists()
-        .trim()
-        .not()
-        .isEmpty()
-        .isInt({ gt: 0 })
-        .toInt()
 
 const buildApi = (app, passport) => {
     app.get(
@@ -113,7 +44,10 @@ const buildApi = (app, passport) => {
         passport.authenticate('jwt', { session: false }),
         [checkString('path', 'path is required')],
         validationHandler,
-        asyncMiddleware(apiGet)
+        asyncMiddleware(async(req, res) => {
+            const path = req.query.path
+            res.status(200).json(await Post.get(path))
+        })
     )
     app.get(
         '/api/list',
@@ -130,14 +64,21 @@ const buildApi = (app, passport) => {
         passport.authenticate('jwt', { session: false }),
         [checkString('post', 'path is required'), checkString('oldPath', 'oldPath must be valid string').optional()],
         validationHandler,
-        asyncMiddleware(apiSave)
+        asyncMiddleware(async(req, res) => {
+            const { post, oldPath } = req.body
+            res.status(200).json(await Post.save(post, oldPath))
+        })
     )
     app.delete(
         '/api/delete',
         passport.authenticate('jwt', { session: false }),
         [checkString('path', 'path is required')],
         validationHandler,
-        asyncMiddleware(apiDelete)
+        asyncMiddleware(async(req, res) => {
+            const path = req.query.path
+            await Post.del(path)
+            res.sendStatus(204)
+        })
     )
 
     app.post(
