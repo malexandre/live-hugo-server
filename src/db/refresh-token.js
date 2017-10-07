@@ -10,19 +10,21 @@ const newRefreshToken = async(email) => {
     return {
         email,
         data,
-        expiration: tokenExpiration.refresh
+        maxAge: tokenExpiration.refresh
     }
 }
 
 const save = async(token) => {
-    const bcrypted = await bcrypt.hash(token.data, bcryptSaltRounds)
+    const salt = await bcrypt.genSalt(bcryptSaltRounds)
+    const bcrypted = await bcrypt.hash(token.data, salt)
     await database.saveObject('token', bcrypted, Object.assign({}, token, { data: bcrypted }))
+    return salt
 }
 
 const get = async(data) => await database.getObject('token', data)
 
 const checkRefreshToken = async(email, token) => {
-    const bcrypted = await bcrypt.hash(token.data, bcryptSaltRounds)
+    const bcrypted = await bcrypt.hash(token.data, token.salt)
     const dbToken = await get(bcrypted)
 
     if (!dbToken) {
