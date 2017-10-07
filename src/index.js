@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const passport = require('passport')
 const winston = require('winston')
 
+const asyncMiddleware = require('./async-middleware')
 const { port, tokenExpiration } = require('./config')
 const { buildApi } = require('./rest')
 const { accessTokenStrategy, getNewAccessToken } = require('./auth/access-token')
@@ -32,25 +33,35 @@ app.use(function(req, res, next) {
 
 buildApi(app, passport)
 
-app.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
-    res.cookie(
-        'refreshToken',
-        { email: req.user.email, token: getNewRefreshToken(req.user.email) },
-        { maxAge: tokenExpiration.refresh, httpOnly: true, secure: true }
-    )
-    res.redirect('/')
-})
+app.post(
+    '/login',
+    passport.authenticate('local', { session: false }),
+    asyncMiddleware(async(req, res) => {
+        const token = await getNewRefreshToken(req.user.email)
+        res.cookie(
+            'refreshToken',
+            { email: req.user.email, token },
+            { maxAge: tokenExpiration.refresh, httpOnly: true, secure: process.env.NODE_ENV === 'production' }
+        )
+        res.redirect('/')
+    })
+)
 
-app.post('/token', (req, res) => {
-    const cookieData = JSON.parse(req.cookies.refreshToken)
-    const token = getNewAccessToken(cookieData.email, cookieData.token)
+app.post(
+    '/token',
+    asyncMiddleware(async(req, res) => {
+        const cookieData = req.cookies.refreshToken
+        const token = await getNewAccessToken(cookieData.email, cookieData.token)
 
-    if (!token) {
-        res.sendStatus(401)
-    }
+        if (!token) {
+            res.sendStatus(401)
+        }
 
-    res.status(200).json({ token, maxAge: tokenExpiration.access })
-})
+        res.status(200).json({ token, maxAge: tokenExpiration.access })
+    })
+)
+
+// app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '../client/dist/index.html')))
 
 app.listen(port, function() {
     winston.info(`live-hugo listening on port ${port}`)
