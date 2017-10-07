@@ -4,6 +4,7 @@ const { check, validationResult } = require('express-validator/check')
 const multer = require('multer')
 const slugify = require('slugify')
 
+const asyncMiddleware = require('../async-middleware')
 const { fs } = require('../promisified-libs')
 const { folders } = require('../config')
 const { del, get, list, save, setPublish } = require('../post')
@@ -47,9 +48,9 @@ const apiDelete = async(req, res) => {
     res.sendStatus(204)
 }
 
-const apiGet = (req, res) => {
+const apiGet = async(req, res) => {
     const path = req.query.path
-    res.status(200).json(get(path))
+    res.status(200).json(await get(path))
 }
 
 const apiList = async(req, res) => {
@@ -68,7 +69,7 @@ const apiList = async(req, res) => {
         orderby = req.query.orderby
     }
 
-    const results = list({
+    const results = await list({
         filter: req.query.filter,
         orderby: orderby,
         offset: !isNaN(offset) && offset >= 0 ? offset : 0,
@@ -78,15 +79,15 @@ const apiList = async(req, res) => {
     res.status(200).json(results)
 }
 
-const apiSave = (req, res) => {
+const apiSave = async(req, res) => {
     const { post, oldPath } = req.body
-    res.status(200).json(save(post, oldPath))
+    res.status(200).json(await save(post, oldPath))
 }
 
 const apiSetPublish = (publishStatus) => {
-    return (req, res) => {
+    return async(req, res) => {
         const { path } = req.body
-        res.status(200).json(setPublish(path, publishStatus))
+        res.status(200).json(await setPublish(path, publishStatus))
     }
 }
 
@@ -112,7 +113,7 @@ const buildApi = (app, passport) => {
         passport.authenticate('jwt', { session: false }),
         [checkString('path', 'path is required')],
         validationHandler,
-        apiGet
+        asyncMiddleware(apiGet)
     )
     app.get(
         '/api/list',
@@ -122,21 +123,21 @@ const buildApi = (app, passport) => {
             checkInteger('count', 'offset must be a positive integer').optional()
         ],
         validationHandler,
-        apiList
+        asyncMiddleware(apiList)
     )
     app.post(
         '/api/save',
         passport.authenticate('jwt', { session: false }),
         [checkString('post', 'path is required'), checkString('oldPath', 'oldPath must be valid string').optional()],
         validationHandler,
-        apiSave
+        asyncMiddleware(apiSave)
     )
     app.delete(
         '/api/delete',
         passport.authenticate('jwt', { session: false }),
         [checkString('path', 'path is required')],
         validationHandler,
-        apiDelete
+        asyncMiddleware(apiDelete)
     )
 
     app.post(
@@ -144,20 +145,24 @@ const buildApi = (app, passport) => {
         passport.authenticate('jwt', { session: false }),
         [checkString('path', 'path is required')],
         validationHandler,
-        apiSetPublish(true)
+        asyncMiddleware(apiSetPublish(true))
     )
     app.post(
         '/api/unpublish',
         passport.authenticate('jwt', { session: false }),
         [checkString('path', 'path is required')],
         validationHandler,
-        apiSetPublish(false)
+        asyncMiddleware(apiSetPublish(false))
     )
 
-    app.post('/api/build', passport.authenticate('jwt', { session: false }), async(req, res) => {
-        await Hugo.build()
-        res.sendStatus(204)
-    })
+    app.post(
+        '/api/build',
+        passport.authenticate('jwt', { session: false }),
+        asyncMiddleware(async(req, res) => {
+            await Hugo.build()
+            res.sendStatus(204)
+        })
+    )
     app.post(
         '/api/upload',
         passport.authenticate('jwt', { session: false }),
