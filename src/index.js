@@ -10,6 +10,7 @@ const { port, tokenExpiration } = require('./config')
 const { buildApi } = require('./rest')
 const { accessTokenStrategy, getNewAccessToken } = require('./auth/access-token')
 const { localStrategy, getNewRefreshToken } = require('./auth/password')
+const { createInitialUser } = require('./db/user')
 
 passport.use(accessTokenStrategy)
 passport.use(localStrategy)
@@ -53,4 +54,5 @@ app.post('/token', (req, res) => {
 
 app.listen(port, function() {
     winston.info(`live-hugo listening on port ${port}`)
+    createInitialUser()
 })
