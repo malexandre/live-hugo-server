@@ -41,7 +41,7 @@ app.post(
         res.cookie(
             'refreshToken',
             { email: req.user.email, token },
-            { maxAge: tokenExpiration.refresh, httpOnly: true, secure: process.env.NODE_ENV === 'production' }
+            { maxAge: tokenExpiration.refresh * 1000, httpOnly: true, secure: process.env.NODE_ENV === 'production' }
         )
         res.redirect('/')
     })
