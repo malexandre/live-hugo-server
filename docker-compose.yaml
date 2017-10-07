@@ -6,8 +6,10 @@ services:
      - "3000:3000"
     volumes:
     - ".:/code"
-    command: nodemon src/index.js
+    command: npm start
   redis:
     image: "redis:alpine"
+    ports:
+     - "6379:6379"
     volumes:
     - "./db:/data"
