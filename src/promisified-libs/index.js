@@ -1,6 +1,7 @@
 const { folders } = require('../config')
 
 const childProcess = require('child_process')
+const crypto = require('crypto')
 const fs = require('fs')
 const git = require('simple-git')(folders.git)
 
@@ -18,6 +19,7 @@ const promisifyModule = (moduleToPromisify, methods) => {
 
 module.exports = {
     childProcess: promisifyModule(childProcess, ['exec']),
+    crypto: promisifyModule(crypto, ['randomBytes']),
     fs: promisifyModule(fs, ['mkdir', 'readdir', 'readFile', 'rename', 'rmdir', 'stat', 'unlink', 'writeFile']),
     simpleGit: promisifyModule(git, ['commit', 'status'])
 }
