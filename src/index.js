@@ -51,10 +51,17 @@ app.post(
     '/token',
     asyncMiddleware(async(req, res) => {
         const cookieData = req.cookies.refreshToken
+
+        if (!cookieData || !cookieData.token) {
+            res.sendStatus(401)
+            return
+        }
+
         const token = await getNewAccessToken(cookieData.email, cookieData.token)
 
         if (!token) {
             res.sendStatus(401)
+            return
         }
 
         res.status(200).json({ token, maxAge: tokenExpiration.access })
