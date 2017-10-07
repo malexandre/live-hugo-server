@@ -50,7 +50,12 @@ test('Calling newRefreshToken should return a new token with the email in argume
 
 test('Saving the token should call the database interface after bcrypting the data', async() => {
     await refreshToken.saveRefreshToken(mockDefaultToken)
-    expect(database.saveObject).toBeCalledWith('token', mockDefaultBcrypted, mockDefaultBcryptedToken)
+    expect(database.saveObject).toBeCalledWith(
+        'token',
+        mockDefaultBcrypted,
+        mockDefaultBcryptedToken,
+        mockDefaultBcryptedToken.maxAge
+    )
     expect(bcrypt.genSalt).toBeCalledWith(12)
     expect(bcrypt.hash).toBeCalledWith(mockDefaultToken.data, 'salt:12')
 })

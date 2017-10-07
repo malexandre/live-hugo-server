@@ -17,7 +17,7 @@ const newRefreshToken = async(email) => {
 const save = async(token) => {
     const salt = await bcrypt.genSalt(bcryptSaltRounds)
     const bcrypted = await bcrypt.hash(token.data, salt)
-    await database.saveObject('token', bcrypted, Object.assign({}, token, { data: bcrypted }))
+    await database.saveObject('token', bcrypted, Object.assign({}, token, { data: bcrypted }), token.maxAge)
     return salt
 }
 
