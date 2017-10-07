@@ -29,6 +29,7 @@
         "passport-jwt": "^3.0.0",
         "passport-local": "^1.0.0",
         "redis": "^2.8.0",
+        "redis-mock": "^0.20.0",
         "simple-git": "^1.77.0",
         "slugify": "^1.2.1",
         "winston": "^2.3.1"
